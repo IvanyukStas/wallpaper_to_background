@@ -1,29 +1,11 @@
-import requests
-from bs4 import BeautifulSoup
-from fake_useragent import UserAgent
 from loguru import logger
 import sys
 import ctypes, os
+from functions import *
 
 
 
 logger.add(sys.stdout, colorize=True, format="<green>{time}</green> <level>{message}</level>")
-
-
-def get_page_by_url(url: str) -> requests.Response:
-    user_agent = UserAgent()
-    headers = {
-        'user-agent': user_agent.random
-    }
-    
-    response = requests.get(url=url, headers=headers)
-    logger.info('Get page!')
-    return response
-
-def get_soup_from_page(response: requests.Response) -> BeautifulSoup:
-    soup = BeautifulSoup(response.text, 'lxml')
-    return soup
-
 
 
 def main():
@@ -43,16 +25,20 @@ def main():
     link = str(link.get('href'))
     link = link.replace('{R_WIDTH}x{R_HEIGHT}', resolution)
     image_by_url = get_page_by_url(link)
-    with open(f'1.jpg', 'wb') as file:
-        file.write(image_by_url.content)
+    path = save_image_from_internet(image_by_url)
+    # with open(f'1.jpg', 'wb') as file:
+    #     file.write(image_by_url.content)
+    if check_os == 'Linux':
+        command = f"gsettings set org.gnome.desktop.background picture-uri file:{path}"
+        os.system(command)
+    else:
+        folder = r"E:\Python_projects\wallpaper_to_background"
+        file_name = r"1.jpg"
 
-    folder = r"E:\Python_projects\wallpaper_to_background"
-    file_name = r"1.jpg"
+        full_path = os.path.join(folder, file_name)
+        img = bytes(full_path, 'utf-8')
 
-    full_path = os.path.join(folder, file_name)
-    img = bytes(full_path, 'utf-8')
-
-    ctypes.windll.user32.SystemParametersInfoA(20, 0, img , 0)
+        ctypes.windll.user32.SystemParametersInfoA(20, 0, img , 0)
 
 
 if __name__ == '__main__':
