@@ -1,3 +1,5 @@
 *.jpg
 /wp_venv
+/img_venv
+/__*
 test.py
